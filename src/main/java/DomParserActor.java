@@ -8,7 +8,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class DomParserActor {
@@ -19,9 +21,17 @@ public class DomParserActor {
     //list of actors
     List<Actor> actors = new ArrayList<>();
 
+
+
+    HashMap <String, Actor>  actorMap = new HashMap<String, Actor>();
+
+    //number of dups
+    int dups = 0;
+
     //Dom doc
     Document dom;
 
+    public HashMap<String, Actor> getActorMap(){return this.actorMap;}
     public void runParser(){
 
 
@@ -32,7 +42,7 @@ public class DomParserActor {
         parseDocument();
 
         //iterate through the list and print data
-        printData();
+//        printData();
     }
 
     //
@@ -68,8 +78,17 @@ public class DomParserActor {
             //grab actor object
             Actor actor = parserActor(element);
 
+            if (this.actorMap.containsKey(actor.getActorName())){
+                this.dups +=1;
+                //can redirect dups to a file if wanted to below
+
+            }else{
+                this.actorMap.put(actor.getActorName(),actor);
+                this.actors.add(actor);
+            }
+
             //add it to list
-            this.actors.add(actor);
+
         }
     }
 
@@ -83,10 +102,10 @@ public class DomParserActor {
              birthYear = null;
         }
 
-
-        System.out.println("INSIDE CREATING ACTOR");
-        System.out.println(name);
-        System.out.println(birthYear);
+//
+//        System.out.println("INSIDE CREATING ACTOR");
+//        System.out.println(name);
+//        System.out.println(birthYear);
 
         //filtering for birthyear
         try {
@@ -126,12 +145,16 @@ public class DomParserActor {
      * content to console
      */
     private void printData() {
+//
+        System.out.println("Total parsed " + this.actorMap.size() + " actors");
 
-        System.out.println("Total parsed " + this.actors.size() + " actors");
+        for (Map.Entry<String,Actor> actor : actorMap.entrySet()) {
+            String key = actor.getKey();
+            Actor value = actor.getValue();
+            System.out.println("KEY = " + key + " Value = " + value.toString());
 
-        for (Actor actor : actors) {
-            System.out.println("\t" + actor.toString());
         }
+        System.out.println("DUPS : "+ this.dups);
     }
 
     private void addData(){

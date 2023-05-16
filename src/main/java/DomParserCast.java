@@ -8,10 +8,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DomParserCast {
 
@@ -21,6 +18,8 @@ public class DomParserCast {
 
     Document dom;
 
+    int dups = 0;
+
 
     public static class InvalidInput extends Exception{
         public InvalidInput(String errorMessage){
@@ -28,6 +27,8 @@ public class DomParserCast {
         }
     }
 
+    //return HashMap obj
+    public HashMap<String,Cast> getCastMap(){return castMap;}
     public void runParser(){
 
         //parse xmpl file and get dom object
@@ -37,7 +38,7 @@ public class DomParserCast {
         parseDocument();
 
         //iterate through the list and print data
-        printData();
+//        printData();
     }
 
     private void parseXmlFile(){
@@ -69,9 +70,14 @@ public class DomParserCast {
             //grab movie object
 
             Cast cast = parserCast(element);
-
+            if(this.castMap.containsKey(cast.getID())){
+                this.dups +=1;
+                //can redirect dups to a file if wanted to below
+            }else {
+                this.castMap.put(cast.getID(),cast);
+            }
             //add it to movie list
-            this.castMap.put(cast.getID(),cast);
+
         }
     }
 
@@ -81,11 +87,9 @@ public class DomParserCast {
 
         String title = getTextValue(element,"t");
 
-        ArrayList<String> actors = getListValue(element,"a");
+        Set<String> actors = new HashSet<>( getListValue(element,"a"));
 
-        for(String actor: actors){
-            System.out.print( actor+ " ");
-        }
+
 
         return new Cast(id,title,actors);
     }
@@ -116,7 +120,7 @@ public class DomParserCast {
             try{
                 textVal = nodeList.item(i).getFirstChild().getNodeValue();
                 if(textVal != null && !toString().isEmpty()){
-                    System.out.println("Parsing through list vals for "+ tagName+" :"+textVal);
+//                    System.out.println("Parsing through list vals for "+ tagName+" :"+textVal);
                     val.add(textVal);
                 }
 
@@ -138,6 +142,7 @@ public class DomParserCast {
             System.out.println("KEY = " + key + " Value = " + value.toString());
 
         }
+        System.out.println("DUPS : "+ this.dups);
     }
 
 

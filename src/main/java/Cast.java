@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Set;
 
 public class Cast {
 
@@ -6,9 +7,9 @@ public class Cast {
 
     private final String title;
 
-    private final ArrayList<String> actor;
+    private final Set<String> actor;
 
-    public Cast(String id, String title, ArrayList<String> actor){
+    public Cast(String id, String title, Set<String> actor){
         // params
         this.id = id;
         this.title = title;
@@ -17,13 +18,13 @@ public class Cast {
     public String getID(){return id;}
     public String getTitle(){return title;}
 
-    public ArrayList<String> getActor(){return actor;}
+    public Set<String> getActor(){return actor;}
 
 
     public String toString(){
         String actors="";
-        for(int i = 0; i < getActor().size(); i++ ){
-            actors += getActor().get(i) +", ";
+        for(String actorStr: getActor()){
+            actors += actorStr+", ";
         }
 
         return  "ID: "+ getID() +", " +

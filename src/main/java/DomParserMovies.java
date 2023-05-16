@@ -9,7 +9,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class DomParserMovies {
@@ -20,6 +22,17 @@ public class DomParserMovies {
 
     List<Movie> movies = new ArrayList<>();
 
+
+    HashMap<String,String> Genre_hmap = new HashMap<>();
+
+
+
+    //hashmpa of movies
+    HashMap<String, Movie> movieMap = new HashMap<>();
+
+    //
+    int dups = 0;
+
     //Dom doc
     Document dom;
     public static class InvalidInput extends Exception{
@@ -28,7 +41,27 @@ public class DomParserMovies {
         }
     }
 
+    public HashMap<String, Movie> getMovieMap() {
+        return movieMap;
+    }
+
     public void runParser(){
+        Genre_hmap.put("Actn","Action");
+        Genre_hmap.put("Porn","Adult");
+        Genre_hmap.put("Advt","Adventure");
+        Genre_hmap.put("Susp","Thriller");
+        Genre_hmap.put("Dram","Drama" );
+        Genre_hmap.put( "Comd","Comedy");
+        Genre_hmap.put("West","Western" );
+        Genre_hmap.put("Docu","Documentary");
+        Genre_hmap.put("BioP","Biography");
+        Genre_hmap.put("Horror","Horr");
+        Genre_hmap.put("Faml","Family");
+        Genre_hmap.put("Myst","Mystery");
+        Genre_hmap.put("Romt","Romance");
+        Genre_hmap.put("ScFi","Sci-Fi");
+        Genre_hmap.put("Fant","Fantasy");
+        Genre_hmap.put("Musc","Music");
 
 
         //parse xmpl file and get dom object
@@ -78,9 +111,16 @@ public class DomParserMovies {
                 if( movie.getDirector() == null || movie.getDirector().isEmpty() ){
                     throw new InvalidInput("SKIPPING: "+movie.getTitle() +" because invalid Director");
                 }
-                this.movies.add(movie);
+
+
+                if (this.movieMap.containsKey(movie.getID()) ){
+                    this.dups+=1;
+                }else{
+                    this.movieMap.put(movie.getID(), movie);
+                    this.movies.add(movie);
+                }
             }catch(InvalidInput e){
-                System.out.println(e);
+//                System.out.println(e);
             }
 
 
@@ -89,7 +129,7 @@ public class DomParserMovies {
     }
 
     private Movie parserMovie(Element element){
-        System.out.println("PARSING MOVE ***********************************************");
+//        System.out.println("PARSING MOVE ***********************************************");
         //grabbing id
         String id = getTextValue(element,"fid");
         //grabbing title
@@ -108,25 +148,31 @@ public class DomParserMovies {
         }
 
 
+
+
+
         //if null skip
-        ArrayList<String> genres = getListValue(element,"cat");
+        ArrayList<String> genres = new ArrayList<>();
+        for (int i = 0; i < getListValue(element,"cat").size();i++){
 
-
-        System.out.println("INSIDE CREATING Movie");
-        System.out.print("TITLE :");
-
-        System.out.println(title);
-        System.out.print("Year :");
-
-        System.out.println(year);
-        System.out.print("Director :");
-
-        System.out.println(director);
-        System.out.print("genre : ");
-        for(String genre : genres){
-            System.out.print(genre+ " ");
+            genres.add(Genre_hmap.get(getListValue(element,"cat").get(i)));
         }
-        System.out.println(" ");
+
+//        System.out.println("INSIDE CREATING Movie");
+//        System.out.print("TITLE :");
+//
+//        System.out.println(title);
+//        System.out.print("Year :");
+//
+//        System.out.println(year);
+//        System.out.print("Director :");
+//
+//        System.out.println(director);
+//        System.out.print("genre : ");
+//        for(String genre : genres){
+//            System.out.print(genre+ " ");
+//        }
+//        System.out.println(" ");
         return new Movie(id, title,year,director,genres);
     }
 
@@ -157,26 +203,28 @@ public class DomParserMovies {
             try{
                 textVal = nodeList.item(i).getFirstChild().getNodeValue();
                 if(textVal != null && !toString().isEmpty()){
-                    System.out.println("Parsing through list vals for "+ tagName+" :"+textVal);
+//                    System.out.println("Parsing through list vals for "+ tagName+" :"+textVal);
                     val.add(textVal);
                 }
 
             }catch (NullPointerException e){
 
             }
-
-
         }
         return val;
     }
 
     private void printData() {
 
-        System.out.println("Total parsed " + this.movies.size() + " movies");
+        System.out.println("Total parsed " + this.movieMap.size() + " movies");
 
-        for (Movie movie : movies) {
-            System.out.println("\t" + movie.toString());
+        for (Map.Entry<String,Movie> movie : movieMap.entrySet()){
+            String key = movie.getKey();
+            Movie value = movie.getValue();
+            System.out.println("KEY = " + key + " Value = " + value.toString());
         }
+
+        System.out.println("DUPS : "+ this.dups);
     }
 
     public static void main(String[] args) {
